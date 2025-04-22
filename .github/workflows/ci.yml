@@ -8,6 +8,7 @@ on:
     branches:
       - '*'
 
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ryangoslingisnotdead/api-for-t-travelling
