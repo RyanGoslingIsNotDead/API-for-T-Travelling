@@ -40,7 +40,6 @@ jobs:
         run: mvn -B clean package -DskipTests
 
       - name: Run Tests
-        if: startsWith(github.ref, 'refs/heads/') || github.event_name == 'pull_request'
         run: mvn test
 
       - name: Upload JAR artifact
