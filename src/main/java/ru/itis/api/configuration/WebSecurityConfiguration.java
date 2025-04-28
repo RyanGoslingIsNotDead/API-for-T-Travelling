@@ -6,6 +6,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,11 +17,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import ru.itis.api.security.details.UserDetailsServiceImpl;
 import ru.itis.api.security.filter.LoginAuthenticationFilter;
 import ru.itis.api.security.handler.LoginAuthenticationFailureHandler;
 import ru.itis.api.security.handler.LoginAuthenticationSuccessHandler;
-import ru.itis.api.security.provider.PhoneNumberAuthenticationProvider;
 
 import java.util.List;
 
@@ -62,9 +61,14 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
-    public PhoneNumberAuthenticationProvider phoneNumberAuthenticationProvider(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder) {
-        return new PhoneNumberAuthenticationProvider(userDetailsService, passwordEncoder);
+    public DaoAuthenticationProvider daoAuthenticationProvider(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+        var provider = new DaoAuthenticationProvider(passwordEncoder);
+
+        provider.setUserDetailsService(userDetailsService);
+
+        return provider;
     }
+
 
     @Bean
     public AuthenticationSuccessHandler successHandler() {

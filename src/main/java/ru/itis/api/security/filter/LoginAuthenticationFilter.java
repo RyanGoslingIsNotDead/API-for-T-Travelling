@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -14,7 +15,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import ru.itis.api.dto.PhoneNumberDto;
 import ru.itis.api.security.exception.AuthMethodNotSupportedException;
-import ru.itis.api.security.token.PhoneNumberPasswordAuthenticationToken;
 import ru.itis.api.util.JsonUtil;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
 
         PhoneNumberDto dto = JsonUtil.read(request.getReader(), PhoneNumberDto.class);
 
-        PhoneNumberPasswordAuthenticationToken authRequest = new PhoneNumberPasswordAuthenticationToken(dto.getPhoneNumber(), dto.getPassword());
+        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(dto.getPhoneNumber(), dto.getPassword());
 
         return getAuthenticationManager().authenticate(authRequest);
 
