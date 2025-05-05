@@ -12,7 +12,7 @@ import ru.itis.api.util.JsonUtil;
 
 import java.io.IOException;
 
-@Component
+@Component("loginAuthenticationFailureHandler")
 public class LoginAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
     @Override
