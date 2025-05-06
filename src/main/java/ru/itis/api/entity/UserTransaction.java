@@ -17,8 +17,8 @@ public class UserTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="is_guessed")
-    private Boolean isGuessed;
+    @Column(name="is_repaid")
+    private Boolean isRepaid;
 
     @Column(name="share_amount")
     private Double shareAmount;
