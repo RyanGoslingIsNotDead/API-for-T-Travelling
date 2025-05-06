@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import ru.itis.api.dictionary.Role;
 
 @Entity
 @Data
@@ -18,11 +17,11 @@ public class UserTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name="is_guessed")
+    private Boolean isGuessed;
 
-    @Column(name="pay_cost")
-    private Long payCost;
+    @Column(name="share_amount")
+    private Double shareAmount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

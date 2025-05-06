@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -26,5 +28,8 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserTravel> travels;
 
 }

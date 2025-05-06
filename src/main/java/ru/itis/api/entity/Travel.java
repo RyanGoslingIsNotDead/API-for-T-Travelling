@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -24,18 +25,21 @@ public class Travel {
     private String name;
 
     @Column(name = "total_budget", nullable = false)
-    private Long totalBudget;
+    private Double totalBudget;
 
     @Column(name = "date_of_begin", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateOfBegin;
+    @Temporal(TemporalType.DATE)
+    private LocalDate dateOfBegin;
 
     @Column(name = "date_of_end", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateOfEnd;
+    @Temporal(TemporalType.DATE)
+    private LocalDate dateOfEnd;
 
-    @OneToMany
-    @JoinColumn(name="user_travel_id")
+    @OneToMany(mappedBy = "travel")
     private List<UserTravel> users;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="creator_id")
+    private User creator;
 
 }

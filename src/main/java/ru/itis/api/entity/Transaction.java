@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import ru.itis.api.dictionary.Category;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -18,12 +21,20 @@ public class Transaction {
     private Long id;
 
     @Column(nullable = false)
-    private Long cost;
+    private Double totalCost;
 
     @Column(nullable = false)
-    private String destination;
+    private String description;
 
-    @Column(name = "category_name", nullable = false)
-    private String categoryName;
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="creator_id")
+    private User creator;
 
 }

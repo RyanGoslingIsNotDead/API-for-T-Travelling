@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import ru.itis.api.dictionary.Role;
 
 @Entity
 @Data
@@ -18,8 +17,8 @@ public class UserTravel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @JoinColumn(name = "is_confirmed")
+    private Boolean isConfirmed;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
