@@ -7,8 +7,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class MessageDto {
 
-    private Boolean statusSuccess;
-
     private String message;
 
 }
