@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import ru.itis.api.dto.MessageDto;
 import ru.itis.api.dto.RegistrationForm;
 import ru.itis.api.entity.User;
+import ru.itis.api.exception.PasswordDoNotMatchException;
+import ru.itis.api.exception.UserAlreadyExistException;
 import ru.itis.api.repository.UserRepository;
 import ru.itis.api.util.JsonUtil;
 
@@ -19,24 +21,14 @@ public class RegistrationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ResponseEntity<String> saveUser(RegistrationForm dto) {
-
-        MessageDto messageDto = new MessageDto();
+    public String saveUser(RegistrationForm dto) {
 
         if (userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    JsonUtil.write(messageDto
-                            .setStatusSuccess(false)
-                            .setMessage("Phone is already exist"))
-            );
+            throw new UserAlreadyExistException("Phone number already exist");
         }
 
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    JsonUtil.write(messageDto
-                            .setStatusSuccess(false)
-                            .setMessage("Password do not match"))
-            );
+            throw new PasswordDoNotMatchException("Password do not match");
         }
 
 
@@ -46,11 +38,7 @@ public class RegistrationService {
 
         userRepository.save(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                JsonUtil.write(messageDto
-                        .setStatusSuccess(true)
-                        .setMessage("Registration successful"))
-        );
+        return "Registration successful";
 
     }
 
