@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import ru.itis.api.dictionary.Role;
+
+import static jakarta.persistence.EnumType.STRING;
 
 @Entity
 @Data
@@ -26,5 +29,11 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
+    @Enumerated(STRING)
+    private Role role;
 
 }
