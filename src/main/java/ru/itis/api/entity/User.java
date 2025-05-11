@@ -25,7 +25,11 @@ public class User {
     @Column(name="phone_number", unique = true, nullable = false)
     private String phoneNumber;
 
-    private String username;
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
 
     @Column(nullable = false)
     private String password;

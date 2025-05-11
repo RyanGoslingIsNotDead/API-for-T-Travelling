@@ -39,13 +39,11 @@ public class RegistrationRestController {
                                     schema = @Schema(implementation = MessageDto.class))),
             }
     )
-    public ResponseEntity<String> registration(
-            @Valid
-            @RequestBody
-            RegistrationForm dto) {
+    public ResponseEntity<String> registration(@Valid @RequestBody RegistrationForm dto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(JsonUtil.write(new MessageDto()
+                                .setStatusSuccess(true)
                                 .setMessage(registrationService.saveUser(dto))
                 )
         );
@@ -57,6 +55,7 @@ public class RegistrationRestController {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(JsonUtil.write(new MessageDto()
+                        .setStatusSuccess(false)
                         .setMessage(e.getMessage()))
         );
     }
@@ -66,6 +65,7 @@ public class RegistrationRestController {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(JsonUtil.write(new MessageDto()
+                        .setStatusSuccess(false)
                         .setMessage(e.getMessage()))
         );
     }
@@ -75,6 +75,7 @@ public class RegistrationRestController {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(JsonUtil.write(new MessageDto()
+                        .setStatusSuccess(false)
                         .setMessage(
                                 e.getAllErrors()
                                         .get(0)

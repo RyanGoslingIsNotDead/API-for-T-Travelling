@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.itis.api.dictionary.Role;
 import ru.itis.api.dto.MessageDto;
 import ru.itis.api.dto.RegistrationForm;
 import ru.itis.api.entity.User;
@@ -34,6 +35,9 @@ public class RegistrationService {
 
         User user = new User()
                 .setPhoneNumber(dto.getPhoneNumber())
+                .setRole(Role.USER)
+                .setFirstName(dto.getFirstName())
+                .setLastName(dto.getLastName())
                 .setPassword(passwordEncoder.encode(dto.getPassword()));
 
         userRepository.save(user);
