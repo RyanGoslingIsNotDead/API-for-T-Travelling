@@ -22,28 +22,20 @@ public class RegistrationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public String saveUser(RegistrationForm dto) {
-
+    public RegistrationForm saveUser(RegistrationForm dto) {
         if (userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             throw new UserAlreadyExistException("Phone number already exist");
         }
-
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new PasswordDoNotMatchException("Password do not match");
         }
-
-
         User user = new User()
                 .setPhoneNumber(dto.getPhoneNumber())
-                .setRole(Role.USER)
                 .setFirstName(dto.getFirstName())
                 .setLastName(dto.getLastName())
+                .setRole(Role.USER)
                 .setPassword(passwordEncoder.encode(dto.getPassword()));
-
         userRepository.save(user);
-
-        return "Registration successful";
-
+        return dto;
     }
-
 }

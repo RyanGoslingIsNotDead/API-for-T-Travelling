@@ -21,6 +21,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Transactional
     void updateRefreshToken(@Param("refreshToken") String refreshToken, @Param("phoneNumber") String phoneNumber);
-
-
 }

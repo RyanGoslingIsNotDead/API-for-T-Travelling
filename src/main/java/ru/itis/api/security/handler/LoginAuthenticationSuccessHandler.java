@@ -11,7 +11,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 import ru.itis.api.dto.JwtTokenPairDto;
 import ru.itis.api.dto.MessageDto;
-import ru.itis.api.service.JwtService;
+import ru.itis.api.util.JwtUtil;
 import ru.itis.api.util.JsonUtil;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JwtService jwtService;
+    private final JwtUtil jwtUtil;
 
 
     @Override
@@ -28,14 +28,12 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
         MessageDto messageDto = new MessageDto();
 
         String phoneNumber = ((UserDetails) authentication.getPrincipal()).getUsername();
-        JwtTokenPairDto tokenPair = jwtService.getTokenPair(phoneNumber);
-        jwtService.saveRefreshToken(tokenPair.getRefreshToken(),phoneNumber);
+        JwtTokenPairDto tokenPair = jwtUtil.getTokenPair(phoneNumber);
+        jwtUtil.saveRefreshToken(tokenPair.getRefreshToken(),phoneNumber);
 
         response.setStatus(200);
         response.setContentType(ContentType.APPLICATION_JSON.getType());
         response.getWriter().write(JsonUtil.write(tokenPair));
-
-        response.getWriter().write(JsonUtil.write(messageDto.setStatusSuccess(true).setMessage("Successfully logged in")));
 
     }
 }

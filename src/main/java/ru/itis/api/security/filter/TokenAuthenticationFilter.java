@@ -10,10 +10,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import ru.itis.api.security.token.JwtAuthenticationToken;
-import ru.itis.api.service.JwtService;
+import ru.itis.api.util.JwtUtil;
 
 
 import java.io.IOException;
@@ -22,17 +21,17 @@ import java.io.IOException;
 public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 
-    private final JwtService jwtService;
+    private final JwtUtil jwtUtil;
     private final AuthenticationFailureHandler failureHandler;
 
 
     public TokenAuthenticationFilter(
             RequestMatcher requestMatcher,
-            JwtService jwtService,
+            JwtUtil jwtUtil,
             AuthenticationManager authenticationManager,
             AuthenticationFailureHandler failureHandler) {
         super(requestMatcher, authenticationManager);
-        this.jwtService = jwtService;
+        this.jwtUtil = jwtUtil;
         this.failureHandler = failureHandler;
     }
 
@@ -40,7 +39,7 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
 
-        String rawToken = jwtService.getRawToken(request);
+        String rawToken = jwtUtil.getRawToken(request);
 
         JwtAuthenticationToken token = new JwtAuthenticationToken(rawToken);
 

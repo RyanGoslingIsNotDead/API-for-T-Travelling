@@ -1,21 +1,19 @@
 package ru.itis.api.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
 public class Travel {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,15 +25,17 @@ public class Travel {
     private Long totalBudget;
 
     @Column(name = "date_of_begin", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateOfBegin;
+    @Temporal(TemporalType.DATE)
+    private LocalDate dateOfBegin;
 
     @Column(name = "date_of_end", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateOfEnd;
+    @Temporal(TemporalType.DATE)
+    private LocalDate dateOfEnd;
 
     @OneToMany
     @JoinColumn(name="user_travel_id")
     private List<UserTravel> users;
 
+    @Column(name = "is_ended", nullable = false)
+    private Boolean isEnded;
 }

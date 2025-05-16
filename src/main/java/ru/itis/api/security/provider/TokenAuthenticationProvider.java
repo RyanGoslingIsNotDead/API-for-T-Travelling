@@ -6,20 +6,18 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import ru.itis.api.security.details.UserDetailsImpl;
 import ru.itis.api.security.details.UserDetailsServiceImpl;
 import ru.itis.api.security.token.JwtAuthenticationToken;
-import ru.itis.api.service.JwtService;
+import ru.itis.api.util.JwtUtil;
 
 
 @Component
 @RequiredArgsConstructor
 public class TokenAuthenticationProvider implements AuthenticationProvider {
 
-    private final JwtService jwtService;
+    private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
 
     @Override
@@ -35,7 +33,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
 
     private String getPhoneNumber(String rawToken) {
         try {
-            return jwtService.getPhoneNumber(rawToken);
+            return jwtUtil.getPhoneNumber(rawToken);
         } catch (JWTVerificationException e) {
             throw new BadCredentialsException("Invalid token");
         }

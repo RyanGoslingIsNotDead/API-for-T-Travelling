@@ -11,7 +11,6 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 @Mapper(componentModel = SPRING)
 public interface UserMapper {
-
+    
     UserDto mapToProfileDto(User user);
-
 }

@@ -2,22 +2,22 @@ package ru.itis.api.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
 import ru.itis.api.dictionary.Role;
+
+import java.util.List;
 
 import static jakarta.persistence.EnumType.STRING;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
 @Table(name = "account")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,4 +40,6 @@ public class User {
     @Enumerated(STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private List<UserTravel> travels;
 }

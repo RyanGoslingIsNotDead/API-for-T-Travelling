@@ -16,13 +16,12 @@ import ru.itis.api.dto.RegistrationForm;
 import ru.itis.api.exception.PasswordDoNotMatchException;
 import ru.itis.api.exception.UserAlreadyExistException;
 import ru.itis.api.service.RegistrationService;
-import ru.itis.api.util.JsonUtil;
 
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "Endpoints for user registration and authentication")
 @RequestMapping("/api/v1/registration")
-public class RegistrationRestController {
+public class RegistrationController {
 
     private final RegistrationService registrationService;
 
@@ -31,58 +30,52 @@ public class RegistrationRestController {
             summary = "Register a new user",
             description = "Creates a new user in the system",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "User registered successfully",
+                    @ApiResponse(responseCode = "201",
+                            description = "User registered successfully",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = MessageDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid input data",
+                    @ApiResponse(responseCode = "400",
+                            description = "Invalid input data",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = MessageDto.class))),
             }
     )
-    public ResponseEntity<String> registration(@Valid @RequestBody RegistrationForm dto) {
+    public ResponseEntity<RegistrationForm> registration(
+            @Valid
+            @RequestBody
+            RegistrationForm dto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(JsonUtil.write(new MessageDto()
-                                .setStatusSuccess(true)
-                                .setMessage(registrationService.saveUser(dto))
-                )
-        );
+                .body(registrationService.saveUser(dto));
     }
 
-
     @ExceptionHandler(UserAlreadyExistException.class)
-    public ResponseEntity<String> handleUserAlreadyExistException(UserAlreadyExistException e) {
+    public ResponseEntity<MessageDto> handleUserAlreadyExistException(
+            UserAlreadyExistException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(JsonUtil.write(new MessageDto()
-                        .setStatusSuccess(false)
-                        .setMessage(e.getMessage()))
-        );
+                .body(new MessageDto().setMessage(e.getMessage()));
     }
 
     @ExceptionHandler(PasswordDoNotMatchException.class)
-    public ResponseEntity<String> handleUserAlreadyExistException(PasswordDoNotMatchException e) {
+    public ResponseEntity<MessageDto> handleUserAlreadyExistException(
+            PasswordDoNotMatchException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(JsonUtil.write(new MessageDto()
-                        .setStatusSuccess(false)
-                        .setMessage(e.getMessage()))
-        );
+                .body(new MessageDto().setMessage(e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException e) {
+    public ResponseEntity<MessageDto> handleValidationExceptions(
+            MethodArgumentNotValidException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(JsonUtil.write(new MessageDto()
-                        .setStatusSuccess(false)
+                .body(new MessageDto()
                         .setMessage(
                                 e.getAllErrors()
                                         .get(0)
                                         .getDefaultMessage()
-                        ))
+                        )
                 );
     }
-
-
 }

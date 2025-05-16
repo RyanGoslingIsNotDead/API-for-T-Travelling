@@ -21,15 +21,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.itis.api.security.filter.LoginAuthenticationFilter;
 import ru.itis.api.security.filter.TokenAuthenticationFilter;
 import ru.itis.api.security.filter.UpdateTokensFilter;
-import ru.itis.api.security.handler.LoginAuthenticationFailureHandler;
-import ru.itis.api.security.handler.LoginAuthenticationSuccessHandler;
 import ru.itis.api.security.matcher.SkipPathRequestMatcher;
-import ru.itis.api.service.JwtService;
+import ru.itis.api.util.JwtUtil;
 
 import java.util.List;
 
@@ -39,20 +36,27 @@ public class WebSecurityConfiguration {
 
     @Bean
     @Order(Integer.MIN_VALUE)
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, LoginAuthenticationFilter loginAuthenticationFilter, TokenAuthenticationFilter tokenAuthenticationFilter, UpdateTokensFilter updateTokensFilter)
+    public SecurityFilterChain apiSecurityFilterChain(
+            HttpSecurity http,
+            LoginAuthenticationFilter loginAuthenticationFilter,
+            TokenAuthenticationFilter tokenAuthenticationFilter,
+            UpdateTokensFilter updateTokensFilter)
             throws Exception {
-
         HttpSecurity httpSecurity = http.securityMatcher("/api/**")
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/registration").permitAll()
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
-                .addFilterAt(loginAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(updateTokensFilter, TokenAuthenticationFilter.class);
-
-
+                .addFilterAt(
+                        loginAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(
+                        tokenAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(
+                        updateTokensFilter,
+                        TokenAuthenticationFilter.class);
         return httpSecurity.build();
     }
 
@@ -62,38 +66,58 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
-    public LoginAuthenticationFilter loginAuthenticationFilter(AuthenticationManager authenticationManager, @Qualifier("loginAuthenticationSuccessHandler") AuthenticationSuccessHandler successHandler, @Qualifier("loginAuthenticationFailureHandler") AuthenticationFailureHandler failureHandler) {
-        return new LoginAuthenticationFilter("/api/v1/login", authenticationManager, successHandler, failureHandler);
+    public LoginAuthenticationFilter loginAuthenticationFilter(
+            AuthenticationManager authenticationManager,
+            @Qualifier("loginAuthenticationSuccessHandler")
+            AuthenticationSuccessHandler successHandler,
+            @Qualifier("loginAuthenticationFailureHandler")
+            AuthenticationFailureHandler failureHandler) {
+        return new LoginAuthenticationFilter(
+                "/api/v1/login",
+                authenticationManager,
+                successHandler,
+                failureHandler);
     }
 
     @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter(JwtService jwtService, AuthenticationManager authenticationManager, AuthenticationFailureHandler failureHandler) {
-        SkipPathRequestMatcher requestMatcher = new SkipPathRequestMatcher("/api/v1/login", "/api/v1/refresh" ,"/api/v1/registration");
-
-        return new TokenAuthenticationFilter(requestMatcher, jwtService, authenticationManager, failureHandler);
+    public TokenAuthenticationFilter tokenAuthenticationFilter(
+            JwtUtil jwtUtil,
+            AuthenticationManager authenticationManager,
+            AuthenticationFailureHandler failureHandler) {
+        SkipPathRequestMatcher requestMatcher = new SkipPathRequestMatcher(
+                "/api/v1/login",
+                "/api/v1/refresh" ,
+                "/api/v1/registration");
+        return new TokenAuthenticationFilter(requestMatcher, jwtUtil, authenticationManager, failureHandler);
     }
 
     @Bean
-    public UpdateTokensFilter updateTokensFilter(AuthenticationManager authenticationManager, @Qualifier("loginAuthenticationSuccessHandler") AuthenticationSuccessHandler successHandler,  AuthenticationFailureHandler failureHandler) {
-
-        return new UpdateTokensFilter("/api/v1/refresh", authenticationManager, successHandler, failureHandler);
+    public UpdateTokensFilter updateTokensFilter(
+            AuthenticationManager authenticationManager,
+            @Qualifier("loginAuthenticationSuccessHandler")
+            AuthenticationSuccessHandler successHandler,
+            AuthenticationFailureHandler failureHandler) {
+        return new UpdateTokensFilter(
+                "/api/v1/refresh",
+                authenticationManager,
+                successHandler,
+                failureHandler);
     }
 
     @Bean
-    public AuthenticationManager providerManager(List<AuthenticationProvider> providers) {
+    public AuthenticationManager providerManager(
+            List<AuthenticationProvider> providers) {
         return new ProviderManager(providers);
     }
 
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+    public DaoAuthenticationProvider daoAuthenticationProvider(
+            PasswordEncoder passwordEncoder,
+            UserDetailsService userDetailsService) {
         var provider = new DaoAuthenticationProvider(passwordEncoder);
-
         provider.setUserDetailsService(userDetailsService);
-
         return provider;
     }
-
-
 
     @Bean
     public JWTVerifier jwtVerifier(Algorithm algorithm) {
@@ -104,7 +128,4 @@ public class WebSecurityConfiguration {
     public Algorithm algorithm(@Value("${jwt.secret}") String secret) {
         return Algorithm.HMAC256(secret);
     }
-
-
-
 }

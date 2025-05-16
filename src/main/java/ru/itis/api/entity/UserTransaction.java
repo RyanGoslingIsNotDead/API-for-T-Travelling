@@ -1,35 +1,31 @@
 package ru.itis.api.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
-import ru.itis.api.dictionary.Role;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
 public class UserTransaction {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name="share_amount")
+    private Long shareAmount;
 
-    @Column(name="pay_cost")
-    private Long payCost;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
 
+    @Column(name = "is_repaid", nullable = false)
+    private Boolean isRepaid;
 }

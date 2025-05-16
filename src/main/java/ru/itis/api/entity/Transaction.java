@@ -1,29 +1,37 @@
 package ru.itis.api.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
+import ru.itis.api.dictionary.Category;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
 public class Transaction {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Long cost;
+    private BigDecimal totalCost;
+
+    private String description;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private String destination;
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
-    @Column(name = "category_name", nullable = false)
-    private String categoryName;
-
+    @ManyToOne
+    @JoinColumn(name="creator_id")
+    private User creator;
 }
