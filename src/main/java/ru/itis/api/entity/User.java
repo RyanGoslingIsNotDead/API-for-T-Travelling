@@ -41,7 +41,4 @@ public class User {
 
     @Enumerated(STRING)
     private Role role;
-
-    @OneToMany(mappedBy = "user")
-    private List<UserTravel> travels;
 }
