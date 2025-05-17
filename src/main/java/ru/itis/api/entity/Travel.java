@@ -1,16 +1,16 @@
 package ru.itis.api.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
@@ -24,18 +24,23 @@ public class Travel {
     private String name;
 
     @Column(name = "total_budget", nullable = false)
-    private Long totalBudget;
+    private Double totalBudget;
 
     @Column(name = "date_of_begin", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateOfBegin;
+    @Temporal(TemporalType.DATE)
+    private LocalDate dateOfBegin;
 
     @Column(name = "date_of_end", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateOfEnd;
+    @Temporal(TemporalType.DATE)
+    private LocalDate dateOfEnd;
 
-    @OneToMany
-    @JoinColumn(name="user_travel_id")
-    private List<UserTravel> users;
+    @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL)
+    private List<UserTravel> users = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="creator_id")
+    private User creator;
+
+    private Boolean isActive;
 
 }

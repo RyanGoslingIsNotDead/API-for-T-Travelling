@@ -1,0 +1,183 @@
+package ru.itis.api.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.itis.api.dto.RequestTravelDto;
+import ru.itis.api.dto.TravelDto;
+import ru.itis.api.dto.TravelParticipantsDto;
+import ru.itis.api.dto.UserDto;
+import ru.itis.api.entity.Travel;
+import ru.itis.api.entity.User;
+import ru.itis.api.entity.UserTravel;
+import ru.itis.api.exception.NotFoundException;
+import ru.itis.api.exception.OperationNotAllowedForOwnerException;
+import ru.itis.api.exception.UserAlreadyExistException;
+import ru.itis.api.mapper.TravelMapper;
+import ru.itis.api.mapper.UserMapper;
+import ru.itis.api.repository.TravelRepository;
+import ru.itis.api.repository.UserTravelRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class TravelService {
+
+    private final UserService userService;
+    private final TravelRepository travelRepository;
+    private final UserTravelRepository userTravelRepository;
+    private final TravelMapper travelMapper;
+    private final UserMapper userMapper;
+
+    public List<TravelDto> getActiveTravels(Long userId) {
+        List<Travel> userTravels = userTravelRepository.findConfirmedTravelsByUserId(userId);
+        List<Long> travelIds = userTravels.stream()
+                .map(Travel::getId)
+                .toList();
+        return travelRepository.findActiveTravelsByIds(travelIds);
+    }
+
+    public List<TravelDto> getCompletedTravels(Long userId) {
+        List<Travel> userTravels = userTravelRepository.findConfirmedTravelsByUserId(userId);
+        List<Long> travelIds = userTravels.stream()
+                .map(Travel::getId)
+                .toList();
+        return travelRepository.findCompletedTravelsByIds(travelIds);
+    }
+
+    public TravelParticipantsDto getTravel(Long travelId) {
+        Optional<TravelParticipantsDto> optionalTravelDetails = travelRepository.findTravelDetailsById(travelId);
+        if (optionalTravelDetails.isEmpty()) {
+            throw new NotFoundException("Travel not found");
+        }
+        TravelParticipantsDto travelParticipantsDto = optionalTravelDetails.get();
+        travelParticipantsDto.setParticipants(
+                userTravelRepository.findUsersByTravelId(travelId));
+        return travelParticipantsDto;
+    }
+
+    @Transactional
+    public TravelParticipantsDto saveTravel(RequestTravelDto requestTravel, User creator) {
+        Travel travel = travelMapper.mapToTravel(requestTravel);
+        travel.setCreator(creator);
+        Travel savedTravel = travelRepository.save(travel);
+
+        List<User> participants = userService.getAllByPhoneNumbers(
+                requestTravel.getParticipantPhones());
+        participants.add(creator);
+        participants.forEach(participant -> {
+            UserTravel userTravel = new UserTravel();
+            userTravel.setTravel(savedTravel);
+            userTravel.setUser(participant);
+//            userTravel.setIsConfirmed(false); // или оставить null и при отказе ставить false?
+            userTravel.setIsConfirmed(participant.getId().equals(creator.getId()));
+            savedTravel.getUsers().add(userTravel);
+        });
+
+        Travel madeTravel = travelRepository.save(savedTravel);
+        return travelMapper.mapToTravelParticipantsDto(madeTravel);
+    }
+
+    @Transactional
+    public void confirmTravel(Long userId, Long travelId) {
+        int updatedRows = userTravelRepository.updateConfirmStatusTrue(userId, travelId);
+        if (updatedRows == 0) {
+            throw new NotFoundException(
+                    "UserTravel not found for userId=" + userId + ", travelId=" + travelId
+            );
+        }
+    }
+
+    @Transactional
+    public void denyTravel(Long userId, Long travelId) {
+        if (isCreator(travelId, userId)) {
+            throw new OperationNotAllowedForOwnerException("Creator cannot deny the travel");
+        }
+        int updatedRows = userTravelRepository.updateConfirmStatusFalse(userId, travelId);
+        if (updatedRows == 0) {
+            throw new NotFoundException(
+                    "UserTravel not found for userId=" + userId + ", travelId=" + travelId
+            );
+        }
+    }
+
+    @Transactional
+    public TravelDto updateTravel(TravelDto travelDto, Long userId) {
+        if (!isCreator(travelDto.getId(), userId)) {
+            throw new AccessDeniedException("The user does not have permission to perform this action");
+        }
+        Optional<Travel> optionalTravel = travelRepository.findById(travelDto.getId());
+        if (optionalTravel.isEmpty()) {
+            throw new NotFoundException("Travel not found");
+        }
+        Travel travel = getModified(optionalTravel.get(), travelDto);
+        return travelMapper.mapToTravelDto(travel);
+    }
+
+    @Transactional
+    public void deleteTravel(Long travelId, Long userId) {
+        if (!isCreator(travelId, userId)) {
+            throw new AccessDeniedException("The user does not have permission to perform this action");
+        }
+        travelRepository.deleteById(travelId);
+    }
+
+    @Transactional
+    public void deleteParticipant(Long travelId, Long participantId, Long userId) {
+        if (!isCreator(travelId, userId)) {
+            throw new AccessDeniedException("The user does not have permission to perform this action");
+        }
+        if (participantId.equals(userId)) {
+            throw new OperationNotAllowedForOwnerException("Creator cannot remove himself from the travel");
+        }
+        userTravelRepository.deleteByUserIdAndTravelId(travelId, participantId);
+    }
+
+    @Transactional
+    public void leaveTravel(Long travelId, Long userId) {
+        if (isCreator(travelId, userId)) {
+            throw new OperationNotAllowedForOwnerException("Creator cannot leave from the travel");
+        }
+        userTravelRepository.deleteByUserIdAndTravelId(travelId, userId);
+    }
+
+    @Transactional
+    public UserDto addParticipant(Long travelId, String phoneNumber, Long userId) {
+        if (!isCreator(travelId, userId)) {
+            throw new AccessDeniedException("The user does not have permission to perform this action");
+        }
+        User user = userService.getUserByPhoneNumber(phoneNumber);
+        if (userTravelRepository.existsByUserIdAndTravelId(travelId, user.getId())) {
+            throw new UserAlreadyExistException("Participant already exist in the travel");
+        }
+        UserTravel userTravel = new UserTravel();
+        userTravel.setTravel(travelRepository.getReferenceById(travelId));
+        userTravel.setUser(user);
+//        userTravel.setIsConfirmed() // ставить ли false по дефолту?
+        userTravelRepository.save(userTravel);
+        return userMapper.mapToUserDto(user);
+    }
+
+    private Travel getModified(Travel travel, TravelDto travelDto) {
+        if (!travel.getName().equals(travelDto.getName())) {
+            travel.setName(travelDto.getName());
+        }
+        if (!travel.getTotalBudget().equals(travelDto.getTotalBudget())) {
+            travel.setTotalBudget(travelDto.getTotalBudget());
+        }
+        if (!travel.getDateOfBegin().equals(travelDto.getDateOfBegin())) {
+            travel.setDateOfBegin(travelDto.getDateOfBegin());
+        }
+        if (!travel.getDateOfEnd().equals(travelDto.getDateOfEnd())) {
+            travel.setDateOfEnd(travelDto.getDateOfEnd());
+        }
+        return travel;
+    }
+
+    private boolean isCreator(Long travelId, Long creatorId) {
+        return travelRepository.existsTravelByIdAndCreatorId(travelId, creatorId);
+    }
+}

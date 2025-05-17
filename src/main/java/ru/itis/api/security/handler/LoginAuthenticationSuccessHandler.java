@@ -22,7 +22,6 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
 
     private final JwtService jwtService;
 
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         MessageDto messageDto = new MessageDto();
@@ -34,8 +33,5 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
         response.setStatus(200);
         response.setContentType(ContentType.APPLICATION_JSON.getType());
         response.getWriter().write(JsonUtil.write(tokenPair));
-
-        response.getWriter().write(JsonUtil.write(messageDto.setStatusSuccess(true).setMessage("Successfully logged in")));
-
     }
 }

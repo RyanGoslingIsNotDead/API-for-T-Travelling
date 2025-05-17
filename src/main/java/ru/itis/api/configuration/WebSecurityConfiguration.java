@@ -26,8 +26,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import ru.itis.api.security.filter.LoginAuthenticationFilter;
 import ru.itis.api.security.filter.TokenAuthenticationFilter;
 import ru.itis.api.security.filter.UpdateTokensFilter;
-import ru.itis.api.security.handler.LoginAuthenticationFailureHandler;
-import ru.itis.api.security.handler.LoginAuthenticationSuccessHandler;
 import ru.itis.api.security.matcher.SkipPathRequestMatcher;
 import ru.itis.api.service.JwtService;
 
@@ -44,7 +42,7 @@ public class WebSecurityConfiguration {
 
         HttpSecurity httpSecurity = http.securityMatcher("/api/**")
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/registration").permitAll()
+                        .requestMatchers("/api/v1/registration", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
@@ -68,7 +66,7 @@ public class WebSecurityConfiguration {
 
     @Bean
     public TokenAuthenticationFilter tokenAuthenticationFilter(JwtService jwtService, AuthenticationManager authenticationManager, AuthenticationFailureHandler failureHandler) {
-        SkipPathRequestMatcher requestMatcher = new SkipPathRequestMatcher("/api/v1/login", "/api/v1/refresh" ,"/api/v1/registration");
+        SkipPathRequestMatcher requestMatcher = new SkipPathRequestMatcher("/api/v1/login", "/api/v1/refresh" ,"/api/v1/registration", "/swagger-ui/**", "/v3/api-docs/**");
 
         return new TokenAuthenticationFilter(requestMatcher, jwtService, authenticationManager, failureHandler);
     }

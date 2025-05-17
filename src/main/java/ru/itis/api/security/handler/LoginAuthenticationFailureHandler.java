@@ -24,7 +24,7 @@ public class LoginAuthenticationFailureHandler implements AuthenticationFailureH
 
         response.setContentType(ContentType.APPLICATION_JSON.getType());
 
-        response.getWriter().write(JsonUtil.write(messageDto.setStatusSuccess(false).setMessage("Unauthorized")));
+        response.getWriter().write(JsonUtil.write(messageDto.setMessage("Unauthorized")));
 
     }
 }
