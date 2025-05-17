@@ -172,11 +172,11 @@ public class TravelController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Deny participation in a travel",
-            description = "Denies the participation of the authenticated user in a specific travel. "
+    @Operation(summary = "Remove user participation from a travel",
+            description = "Removes the authenticated user's participation from a specific travel. "
                     + "The method requires authentication and uses the current user's id and the provided travel id.")
     @ApiResponse(responseCode = "200",
-            description = "Successful denial of participation in the travel")
+            description = "Successful removal of user participation (or the user was not associated with the travel)")
     @ApiResponse(responseCode = "401",
             description = "Unauthorized - User is not authenticated",
             content = @Content(
@@ -184,18 +184,12 @@ public class TravelController {
                     schema = @Schema(implementation = MessageDto.class),
                     examples = @ExampleObject(value = "{\"message\": \"Unauthorized\"}")))
     @ApiResponse(responseCode = "409",
-            description = "Conflict - The user is the creator of the travel and cannot deny participation",
+            description = "Conflict - The user is the creator of the travel and cannot remove their participation",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = MessageDto.class),
                     examples = @ExampleObject(value = "{\"message\": \"Creator cannot deny the travel\"}")))
-    @ApiResponse(responseCode = "404",
-            description = "Not Found - The user is not associated with the specified travel",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = MessageDto.class),
-                    examples = @ExampleObject(value = "{\"message\": \"UserTravel not found for userId=1, travelId=2\"}")))
-    @GetMapping("/travels/deny/{travelId}")
+    @DeleteMapping("/travels/deny/{travelId}")
     public ResponseEntity<Void> denyTravel(
             @Parameter(description = "Id of the travel to deny participation",
                     required = true,

@@ -17,7 +17,6 @@ import static jakarta.persistence.EnumType.STRING;
 @Accessors(chain = true)
 @Table(name = "account")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,4 +42,6 @@ public class User {
     @Enumerated(STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private List<UserTravel> travels;
 }

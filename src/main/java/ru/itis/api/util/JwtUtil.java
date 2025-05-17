@@ -1,4 +1,4 @@
-package ru.itis.api.service;
+package ru.itis.api.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -12,14 +12,13 @@ import org.springframework.stereotype.Service;
 import ru.itis.api.dto.JwtTokenPairDto;
 import ru.itis.api.repository.UserRepository;
 
-
 import java.util.Date;
 import java.util.Optional;
 
 
 @Service
 @RequiredArgsConstructor
-public class JwtService {
+public class JwtUtil {
 
     private final static String AUTH_HEADER = "Authorization";
     private final static String AUTH_HEADER_PREFIX = "Bearer ";

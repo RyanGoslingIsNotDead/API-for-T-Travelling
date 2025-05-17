@@ -2,6 +2,7 @@ package ru.itis.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itis.api.dto.RequestTravelDto;
@@ -17,6 +18,7 @@ import ru.itis.api.exception.UserAlreadyExistException;
 import ru.itis.api.mapper.TravelMapper;
 import ru.itis.api.mapper.UserMapper;
 import ru.itis.api.repository.TravelRepository;
+import ru.itis.api.repository.UserRepository;
 import ru.itis.api.repository.UserTravelRepository;
 
 import java.util.List;
@@ -26,7 +28,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TravelService {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final TravelRepository travelRepository;
     private final UserTravelRepository userTravelRepository;
     private final TravelMapper travelMapper;
@@ -65,14 +67,13 @@ public class TravelService {
         travel.setCreator(creator);
         Travel savedTravel = travelRepository.save(travel);
 
-        List<User> participants = userService.getAllByPhoneNumbers(
+        List<User> participants = userRepository.findAllByPhoneNumbers(
                 requestTravel.getParticipantPhones());
         participants.add(creator);
         participants.forEach(participant -> {
             UserTravel userTravel = new UserTravel();
             userTravel.setTravel(savedTravel);
             userTravel.setUser(participant);
-//            userTravel.setIsConfirmed(false); // или оставить null и при отказе ставить false?
             userTravel.setIsConfirmed(participant.getId().equals(creator.getId()));
             savedTravel.getUsers().add(userTravel);
         });
@@ -96,12 +97,7 @@ public class TravelService {
         if (isCreator(travelId, userId)) {
             throw new OperationNotAllowedForOwnerException("Creator cannot deny the travel");
         }
-        int updatedRows = userTravelRepository.updateConfirmStatusFalse(userId, travelId);
-        if (updatedRows == 0) {
-            throw new NotFoundException(
-                    "UserTravel not found for userId=" + userId + ", travelId=" + travelId
-            );
-        }
+        userTravelRepository.deleteByUserIdAndTravelId(travelId, userId);
     }
 
     @Transactional
@@ -149,14 +145,15 @@ public class TravelService {
         if (!isCreator(travelId, userId)) {
             throw new AccessDeniedException("The user does not have permission to perform this action");
         }
-        User user = userService.getUserByPhoneNumber(phoneNumber);
+        User user = userRepository.findByPhoneNumber(phoneNumber).
+                orElseThrow(() -> new UsernameNotFoundException("User not found with phone number: " + phoneNumber));
         if (userTravelRepository.existsByUserIdAndTravelId(travelId, user.getId())) {
             throw new UserAlreadyExistException("Participant already exist in the travel");
         }
         UserTravel userTravel = new UserTravel();
         userTravel.setTravel(travelRepository.getReferenceById(travelId));
         userTravel.setUser(user);
-//        userTravel.setIsConfirmed() // ставить ли false по дефолту?
+        userTravel.setIsConfirmed(false);
         userTravelRepository.save(userTravel);
         return userMapper.mapToUserDto(user);
     }
