@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itis.api.entity.User;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,4 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Transactional
     void updateRefreshToken(@Param("refreshToken") String refreshToken, @Param("phoneNumber") String phoneNumber);
+
+    @Query("SELECT u FROM User u WHERE u.phoneNumber IN :phoneNumbers")
+    List<User> findAllByPhoneNumbers(@Param("phoneNumbers") List<String> phoneNumbers);
 }

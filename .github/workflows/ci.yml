@@ -41,6 +41,8 @@ jobs:
 
       - name: Run Tests
         run: mvn test
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
@@ -109,5 +111,6 @@ jobs:
             -e DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
             -e DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
             -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
             -p 8080:8080 \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${GITHUB_SHA::8}"

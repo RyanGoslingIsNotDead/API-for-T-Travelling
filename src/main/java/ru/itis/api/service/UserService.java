@@ -24,7 +24,7 @@ public class UserService {
     public UserDto getUserByPhoneNumber(String phoneNumber) {
         User user = userRepository.findByPhoneNumber(phoneNumber).
                 orElseThrow(() -> new UsernameNotFoundException("User not found with phone number: " + phoneNumber));
-        return userMapper.mapToProfileDto(user);
+        return userMapper.mapToUserDto(user);
     }
 
     public UpdateUserDto updateUser(UpdateUserDto updateUserDto, String phoneNumber) {

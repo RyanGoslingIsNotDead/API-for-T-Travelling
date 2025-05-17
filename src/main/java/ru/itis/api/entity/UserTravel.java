@@ -23,6 +23,6 @@ public class UserTravel {
     @JoinColumn(name = "travel_id")
     private Travel travel;
 
-    @Column(name = "is_confirmed", nullable = false)
+    @Column(nullable = false)
     private Boolean isConfirmed;
 }

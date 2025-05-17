@@ -1,6 +1,5 @@
 package ru.itis.api.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -34,12 +33,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @OneToMany(mappedBy = "user")
+    private List<UserTravel> travels;
+
     @Column(name = "refresh_token")
     private String refreshToken;
 
     @Enumerated(STRING)
     private Role role;
-
-    @OneToMany(mappedBy = "user")
-    private List<UserTravel> travels;
 }
