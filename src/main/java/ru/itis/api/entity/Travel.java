@@ -32,9 +32,12 @@ public class Travel {
     @Temporal(TemporalType.DATE)
     private LocalDate dateOfEnd;
 
-    @OneToMany
-    @JoinColumn(name="user_travel_id")
+    @OneToMany(mappedBy = "travel")
     private List<UserTravel> users;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="creator_id")
+    private User creator;
 
     @Column(name = "is_ended", nullable = false)
     private Boolean isEnded;
